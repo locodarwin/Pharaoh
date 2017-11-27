@@ -100,6 +100,14 @@ namespace Pharaoh
 
             // Command prefix
             public static string sComPrefix;
+
+            // Global positioning
+            public static int xx, yy, zz, yyaw; 
+
+            // Racehorse parameters
+            public static Single pBaseSpeed;
+            public static int pWeight;
+
         }
 
         private void butLogin_Click(object sender, EventArgs e)

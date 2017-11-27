@@ -26,7 +26,9 @@ namespace Pharaoh
                 case "ver":
                     DoVersion(sName, iType, iSession, cmd);
                     break;
-
+                case "movetest":
+                    DoMoveTest(sName, iType, iSession, cmd);
+                    break;
 
             }
 
@@ -66,6 +68,53 @@ namespace Pharaoh
             }
             Response(iSess, iType, Globals.sAppName + " " + Globals.sVersion + " - " + Globals.sByline);
         }
+
+
+        // Command VERSION
+        private void DoMoveTest(string sName, int iType, int iSess, string[] cmd)
+        {
+            int iCitnum = GetCitnum(sName);
+            Globals.LogStat = Logging.Command;
+            Status("Command: movetest (requested by " + sName + " " + iCitnum.ToString() + ")");
+
+            // Check permissions
+            if (CheckPerms("movetest", iCitnum) == false)
+            {
+                Response(iSess, iType, "Sorry, " + sName + ", but you do not have permission to use the " + cmd[0] + " command.");
+                return;
+            }
+
+            // get bot current location and add to globals positioning
+            Globals.xx = _instance.Attributes.MyX;
+            Globals.yy = _instance.Attributes.MyY;
+            Globals.zz = _instance.Attributes.MyZ;
+
+            // Move 4 meters east
+            Globals.xx = Globals.xx - 2000;
+            _instance.Attributes.MyX = Globals.xx;
+            _instance.StateChange();
+
+            // Move 4 meters north
+            Globals.zz = Globals.zz + 2000;
+            _instance.Attributes.MyZ = Globals.zz;
+            _instance.StateChange();
+
+            // Move 4 meters west
+            // Move 4 meters north
+            Globals.xx = Globals.xx + 2000;
+            _instance.Attributes.MyX = Globals.xx;
+            _instance.StateChange();
+
+            // Move 4 meters south
+            Globals.zz = Globals.zz - 2000;
+            _instance.Attributes.MyZ = Globals.zz;
+            _instance.StateChange();
+
+
+
+            Response(iSess, iType, Globals.sAppName + " " + Globals.sVersion + " - " + Globals.sByline);
+        }
+
 
 
     }
