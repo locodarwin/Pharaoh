@@ -16,6 +16,10 @@ namespace Pharaoh
         public Timer aTimer;
         BackgroundWorker m_Login;
 
+        // Timer and BGW for bot movement
+        public Timer aMove;
+        //BackgroundWorker m_Move;
+
 
         public struct Coords
         {
@@ -55,8 +59,13 @@ namespace Pharaoh
             // The AW message queue timer
             aTimer = new Timer();
             aTimer.Tick += new EventHandler(aTimer_Tick);
-            aTimer.Interval = 50;
+            aTimer.Interval = 100;
             aTimer.Start();
+
+            // The bot movement timer (specific to bots that move)
+            aMove = new Timer();
+            aMove.Tick += new EventHandler(aMove_Tick);
+            aTimer.Interval = 100;
 
             // Background tasking definitions for the universe & world login
             m_Login = new BackgroundWorker();
@@ -105,8 +114,13 @@ namespace Pharaoh
             public static int xx, yy, zz, yyaw; 
 
             // Racehorse parameters
-            public static Single pBaseSpeed;
+            //public static int pBaseSpeed = 1300;            // How far a horse can run in one second, in centimeters
+            public static int pBaseSpeed = 900;            // How far a horse can run in one second, in centimeters
             public static int pWeight;
+
+            // Racehorse flags
+            public static bool iRunning, iTrotting, iWalking;
+            public static Coords Dest;
 
         }
 
@@ -247,6 +261,10 @@ namespace Pharaoh
             _instance.Attributes.MyZ = Globals.iZPos;
             _instance.Attributes.MyYaw = Globals.iYaw;
             _instance.Attributes.MyType = Globals.iAV;
+            Globals.Dest.x = Globals.iXPos;
+            Globals.Dest.y = Globals.iYPos;
+            Globals.Dest.z = Globals.iZPos;
+            Globals.Dest.yaw = Globals.iYaw;
 
             rc = _instance.StateChange();
             if (rc == Result.Success)

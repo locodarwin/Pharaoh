@@ -41,6 +41,16 @@ namespace Pharaoh
 
         }
 
+        private void OnEventBotgram(IInstance sender)
+        {
+            string sFromName = _instance.Attributes.BotgramFromName;
+            int iFromCitnum = _instance.Attributes.BotgramFrom;
+            string sText = _instance.Attributes.BotgramText;
+
+            ParseBotgram(sFromName, iFromCitnum, sText);
+
+        }
+
 
     }
 }

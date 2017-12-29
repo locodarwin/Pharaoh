@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace Pharaoh
 {
     public partial class Form1
@@ -26,8 +28,14 @@ namespace Pharaoh
                 case "ver":
                     DoVersion(sName, iType, iSession, cmd);
                     break;
-                case "movetest":
-                    DoMoveTest(sName, iType, iSession, cmd);
+                case "speed":
+                    DoSpeed(sName, iType, iSession, cmd);
+                    break;
+                case "gallop":
+                    DoGallop(sName, iType, iSession, cmd);
+                    break;
+                case "gohome":
+                    DoGoHome(sName, iType, iSession, cmd);
                     break;
 
             }
@@ -70,51 +78,130 @@ namespace Pharaoh
         }
 
 
-        // Command VERSION
-        private void DoMoveTest(string sName, int iType, int iSess, string[] cmd)
+        // Command SPEED
+        private void DoSpeed(string sName, int iType, int iSess, string[] cmd)
         {
             int iCitnum = GetCitnum(sName);
             Globals.LogStat = Logging.Command;
-            Status("Command: movetest (requested by " + sName + " " + iCitnum.ToString() + ")");
+            Status("Command: speed (requested by " + sName + " " + iCitnum.ToString() + ")");
 
             // Check permissions
-            if (CheckPerms("movetest", iCitnum) == false)
+            if (CheckPerms("speed", iCitnum) == false)
             {
                 Response(iSess, iType, "Sorry, " + sName + ", but you do not have permission to use the " + cmd[0] + " command.");
                 return;
             }
 
-            // get bot current location and add to globals positioning
-            Globals.xx = _instance.Attributes.MyX;
-            Globals.yy = _instance.Attributes.MyY;
-            Globals.zz = _instance.Attributes.MyZ;
+            if (cmd.Length != 2)
+            {
+                Response(iSess, iType, "Command must have 1 parameter: speed (in centimeters).");
+            }
 
-            // Move 4 meters east
-            Globals.xx = Globals.xx - 2000;
-            _instance.Attributes.MyX = Globals.xx;
-            _instance.StateChange();
-
-            // Move 4 meters north
-            Globals.zz = Globals.zz + 2000;
-            _instance.Attributes.MyZ = Globals.zz;
-            _instance.StateChange();
-
-            // Move 4 meters west
-            // Move 4 meters north
-            Globals.xx = Globals.xx + 2000;
-            _instance.Attributes.MyX = Globals.xx;
-            _instance.StateChange();
-
-            // Move 4 meters south
-            Globals.zz = Globals.zz - 2000;
-            _instance.Attributes.MyZ = Globals.zz;
-            _instance.StateChange();
+            Globals.pBaseSpeed = Convert.ToInt32(cmd[1]);
+            Response(iSess, iType, "Speed (in centimeters) now set to " + Globals.pBaseSpeed.ToString());
 
 
-
-            Response(iSess, iType, Globals.sAppName + " " + Globals.sVersion + " - " + Globals.sByline);
         }
 
+
+        // Command GoHome
+        private void DoGoHome(string sName, int iType, int iSess, string[] cmd)
+        {
+            int iCitnum = GetCitnum(sName);
+            Globals.LogStat = Logging.Command;
+            Status("Command: gohome (requested by " + sName + " " + iCitnum.ToString() + ")");
+
+            // Check permissions
+            if (CheckPerms("gohome", iCitnum) == false)
+            {
+                Response(iSess, iType, "Sorry, " + sName + ", but you do not have permission to use the " + cmd[0] + " command.");
+                return;
+            }
+
+            Response(iSess, iType, "Warping to login location.");
+
+            _instance.Attributes.MyX = Globals.iXPos;
+            _instance.Attributes.MyY = Globals.iYPos;
+            _instance.Attributes.MyZ = Globals.iZPos;
+            _instance.Attributes.MyYaw = Globals.iYaw;
+            _instance.StateChange();
+
+        }
+
+
+
+        // Command GALLOP
+        private void DoGallop(string sName, int iType, int iSess, string[] cmd)
+        {
+            int iCitnum = GetCitnum(sName);
+            Globals.LogStat = Logging.Command;
+            Status("Command: gallop (requested by " + sName + " " + iCitnum.ToString() + ")");
+
+            // Check permissions
+            if (CheckPerms("gallop", iCitnum) == false)
+            {
+                Response(iSess, iType, "Sorry, " + sName + ", but you do not have permission to use the " + cmd[0] + " command.");
+                return;
+            }
+
+            if (cmd.Length != 3)
+            {
+                Response(iSess, iType, "Command must have 2 parameters: direction and distance.");
+            }
+
+            // Store current coords
+            Coords Current, Final;
+            Current.x = _instance.Attributes.MyX;
+            Current.y = _instance.Attributes.MyY;
+            Current.z = _instance.Attributes.MyZ;
+            Current.yaw = 0;
+            Final = Current;
+
+            // Galloping north test
+            if (cmd[1].ToLower() == "north")
+            {
+                Globals.iRunning = true;
+                Globals.Dest.z = Globals.Dest.z + Convert.ToInt32(cmd[2]);
+
+                Response(iSess, iType, "Moving " + cmd[2] + " centimeters north.");
+                aMove.Start();
+            }
+
+            // Galloping south test
+            if (cmd[1].ToLower() == "south")
+            {
+                Globals.iRunning = true;
+                Globals.Dest.z = Globals.Dest.z + (-1 * Convert.ToInt32(cmd[2]));
+
+                Response(iSess, iType, "Moving " + cmd[2] + " centimeters south.");
+                aMove.Start();
+            }
+
+            // Galloping west test
+            if (cmd[1].ToLower() == "west")
+            {
+                Globals.iRunning = true;
+                Globals.Dest.x = Globals.Dest.x + Convert.ToInt32(cmd[2]);
+
+                Response(iSess, iType, "Moving " + cmd[2] + " centimeters west.");
+                aMove.Start();
+            }
+
+
+            // Galloping northwest test
+            if (cmd[1].ToLower() == "nw")
+            {
+                Globals.iRunning = true;
+                Globals.Dest.x = Globals.Dest.x + Convert.ToInt32(cmd[2]);
+                Globals.Dest.z = Globals.Dest.z + Convert.ToInt32(cmd[2]);
+
+                Response(iSess, iType, "Moving " + cmd[2] + " centimeters northwest.");
+                aMove.Start();
+            }
+
+
+
+        }
 
 
     }
